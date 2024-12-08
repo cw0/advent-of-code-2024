@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
+// TODO: this isn't working because its not a tolerance its a pop operation
 fn main() -> io::Result<()> {
     // let args: Vec<String> = env::args().collect();
     // let file_path = &args[1];
@@ -30,34 +31,28 @@ fn main() -> io::Result<()> {
                     let current: i32 = report_strings[current_index].parse().unwrap();
                     let current_displacement: i32 = current - previous;
 
-                    if current_displacement == 0 {
+                    if current_displacement == 0 || current_displacement.abs() > 3 {
                         failure_count += 1;
-                        break;
-                    }
-
-                    if current_displacement.abs() > 3 {
-                        is_valid = false;
-                        break;
-                    }
-
-                    if current_displacement > 0 {
+                    } else if current_displacement > 0 {
                         if previous_direction >= 0 {
                             previous_direction = 1;
                         } else {
-                            is_valid = false;
-                            break;
+                            failure_count += 1;
                         }
                     } else if current_displacement < 0 {
                         if previous_direction <= 0 {
                             previous_direction = -1;
                         } else {
-                            is_valid = false;
-                            break;
+                            failure_count += 1;
                         }
                     }
 
                     current_index += 1;
                     previous_index += 1;
+
+                    if failure_count > 1 {
+                        is_valid = false;
+                    }
                 }
 
                 if is_valid {
