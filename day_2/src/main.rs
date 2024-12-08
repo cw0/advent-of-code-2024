@@ -2,7 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader};
 
-// TODO: this isn't working because its not a tolerance its a pop operation
+// TODO: convert to lib
 fn main() -> io::Result<()> {
     // let args: Vec<String> = env::args().collect();
     // let file_path = &args[1];
@@ -13,6 +13,14 @@ fn main() -> io::Result<()> {
     let reader = BufReader::new(file);
     let mut count: u32 = 0;
 
+    // These elves suck at directions almost as much as me
+    // For this challenge a set of readings is still considered safe as long as REMOVING one item
+    // would make the set "safe"
+    // NOTE: there are several approaches coming to mind here:
+    // a) creating a separate collection to store failures sans the first failure point
+    // b) immediate parsing in place after removing the failure
+    // c) manipulating the indices based on if a failure has occured
+    // option c is the best performance wise so here we go
     for line in reader.lines() {
         match line {
             Ok(raw_report) => {
@@ -47,11 +55,13 @@ fn main() -> io::Result<()> {
                         }
                     }
 
-                    current_index += 1;
-                    previous_index += 1;
-
                     if failure_count > 1 {
                         is_valid = false;
+                    } else if failure_count == 1 {
+                        current_index += 1;
+                    } else {
+                        current_index += 1;
+                        previous_index += 1;
                     }
                 }
 
