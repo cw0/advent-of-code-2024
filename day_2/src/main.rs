@@ -33,31 +33,46 @@ fn main() -> io::Result<()> {
                 let mut previous_direction: i32 = 0;
                 let mut failure_count = 0;
                 let mut is_valid = true;
+                let mut should_pop: bool = false;
+                let mut should_correct: bool = false;
 
                 while current_index < report_size {
+                    if should_pop {
+                        should_correct = true;
+                        should_pop = false;
+                    }
+
                     let previous: i32 = report_strings[previous_index].parse().unwrap();
                     let current: i32 = report_strings[current_index].parse().unwrap();
                     let current_displacement: i32 = current - previous;
 
                     if current_displacement == 0 || current_displacement.abs() > 3 {
                         failure_count += 1;
+                        should_pop = false;
                     } else if current_displacement > 0 {
                         if previous_direction >= 0 {
                             previous_direction = 1;
                         } else {
                             failure_count += 1;
+                            should_pop = true;
                         }
                     } else if current_displacement < 0 {
                         if previous_direction <= 0 {
                             previous_direction = -1;
                         } else {
                             failure_count += 1;
+                            should_pop = true;
                         }
                     }
 
                     if failure_count > 1 {
                         is_valid = false;
-                    } else if failure_count == 1 {
+                    }
+
+                    if should_correct {
+                        previous_index += 2;
+                        should_correct = false;
+                    } else if should_pop {
                         current_index += 1;
                     } else {
                         current_index += 1;
